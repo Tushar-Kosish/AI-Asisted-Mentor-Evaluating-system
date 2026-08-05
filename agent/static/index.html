@@ -56,6 +56,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .brand {
@@ -225,7 +227,6 @@
       box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
     }
 
-    /* Submissions Cards */
     .submissions-list {
       display: flex;
       flex-direction: column;
@@ -336,7 +337,6 @@
       border-radius: 10px;
     }
 
-    /* Pros and Cons Split Grid */
     .pros-cons-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -381,7 +381,6 @@
 
     .point-list li { margin-bottom: 4px; }
 
-    /* Real-World Market Validation Box */
     .market-box {
       background: rgba(6, 182, 212, 0.06);
       border: 1px solid rgba(6, 182, 212, 0.25);
@@ -406,7 +405,6 @@
       line-height: 1.5;
     }
 
-    /* Mentor Questions Section */
     .questions-box {
       background: rgba(124, 58, 237, 0.08);
       border: 1px dashed rgba(124, 58, 237, 0.35);
@@ -450,6 +448,23 @@
       color: var(--text-muted);
     }
 
+    .api-config-bar {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .api-config-bar input {
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      width: 200px;
+    }
+
     .toast {
       position: fixed;
       bottom: 24px;
@@ -482,9 +497,15 @@
         </div>
         <span class="brand-tag">AI-Powered Judging</span>
       </div>
-      <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('judge')">🏆 Judge Portal</button>
-        <button class="tab-btn" onclick="switchTab('submit')">📝 Pitch Submission</button>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="api-config-bar">
+          <span>Backend URL:</span>
+          <input type="text" id="apiBaseInput" placeholder="http://localhost:5000" onchange="saveApiBase()">
+        </div>
+        <div class="nav-tabs">
+          <button class="tab-btn active" onclick="switchTab('judge')">🏆 Judge Portal</button>
+          <button class="tab-btn" onclick="switchTab('submit')">📝 Pitch Submission</button>
+        </div>
       </div>
     </div>
   </header>
@@ -567,7 +588,25 @@
   <div id="toast" class="toast">Action completed successfully</div>
 
   <script>
-    const API_BASE = window.location.origin;
+    function getApiBase() {
+      const saved = localStorage.getItem('asc_api_base');
+      if (saved) return saved;
+      if (window.location.origin.includes('github.io')) {
+        return 'https://asc-agent.onrender.com';
+      }
+      return window.location.origin;
+    }
+
+    function saveApiBase() {
+      const val = document.getElementById('apiBaseInput').value.trim().replace(/\/+$/, '');
+      if (val) {
+        localStorage.setItem('asc_api_base', val);
+        showToast(`API Server set to: ${val}`);
+        fetchHackathons();
+      }
+    }
+
+    document.getElementById('apiBaseInput').value = getApiBase();
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -590,6 +629,7 @@
     }
 
     async function fetchHackathons() {
+      const API_BASE = getApiBase();
       const judgeId = document.getElementById('judgeId').value || 'mentor@hackathon.org';
       try {
         const res = await fetch(`${API_BASE}/api/hackathons?judge_id=${encodeURIComponent(judgeId)}`);
@@ -597,7 +637,7 @@
         
         const select = document.getElementById('hackathonSelect');
         select.innerHTML = '';
-        if (hackathons.length === 0) {
+        if (!Array.isArray(hackathons) || hackathons.length === 0) {
           select.innerHTML = '<option value="">No hackathons created yet</option>';
           document.getElementById('submissionsContainer').innerHTML = '<div class="empty-state">No hackathons created yet. Create one on the left!</div>';
           return;
@@ -613,11 +653,13 @@
         loadSubmissions();
       } catch (err) {
         console.error('Failed to load hackathons:', err);
+        document.getElementById('submissionsContainer').innerHTML = `<div class="empty-state">Could not connect to API server at <code>${getApiBase()}</code>. Start local agent server or check backend URL.</div>`;
       }
     }
 
     async function handleCreateHackathon(e) {
       e.preventDefault();
+      const API_BASE = getApiBase();
       const name = document.getElementById('hackathonName').value;
       const judge_id = document.getElementById('judgeId').value;
       const criteria = document.getElementById('hackathonCriteria').value;
@@ -638,6 +680,7 @@
     }
 
     async function loadSubmissions() {
+      const API_BASE = getApiBase();
       const hackathonId = document.getElementById('hackathonSelect').value;
       if (!hackathonId) return;
 
@@ -646,7 +689,7 @@
         const submissions = await res.json();
         
         const container = document.getElementById('submissionsContainer');
-        if (submissions.length === 0) {
+        if (!Array.isArray(submissions) || submissions.length === 0) {
           container.innerHTML = `<div class="empty-state">No submissions yet for Hackathon Session #${hackathonId}. Share Hack ID #${hackathonId} with participants!</div>`;
           return;
         }
@@ -735,6 +778,7 @@
     }
 
     async function verifyHackathonId() {
+      const API_BASE = getApiBase();
       const id = document.getElementById('subHackathonId').value;
       const statusEl = document.getElementById('verifyStatus');
       if (!id) return;
@@ -748,7 +792,7 @@
         const data = await res.json();
         if (data.valid) {
           statusEl.style.color = '#10b981';
-          statusEl.innerText = `Valid Session: ${data.hackathonName}`;
+          statusEl.innerText = `Session: ${data.hackathonName}`;
         } else {
           statusEl.style.color = '#ef4444';
           statusEl.innerText = 'Invalid Hackathon Session ID';
@@ -760,6 +804,7 @@
 
     async function handleProjectSubmit(e) {
       e.preventDefault();
+      const API_BASE = getApiBase();
       const hackathon_id = document.getElementById('subHackathonId').value;
       const project_name = document.getElementById('subProjectName').value;
       const github_link = document.getElementById('subGithubLink').value;
@@ -793,7 +838,6 @@
       return div.innerHTML;
     }
 
-    // Initial load
     fetchHackathons();
   </script>
 </body>
