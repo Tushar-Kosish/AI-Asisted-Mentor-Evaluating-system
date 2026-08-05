@@ -8,12 +8,14 @@
 /frontend/.env.local
 
 # Ignore Python virtual environments and caches
+.venv/
 **/__pycache__/
 *.pyc
 
-# Ignore the local database file
+# Ignore local database files
 /agent/hackathon.db
-hackathon.db
+/agent/instance/
+*.db
 
 # Ignore OS-specific files
 .DS_Store
