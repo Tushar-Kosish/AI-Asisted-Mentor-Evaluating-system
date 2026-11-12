@@ -59,10 +59,10 @@ def _build_preprocessor() -> ColumnTransformer:
         ]
     )
     text_pipeline = TfidfVectorizer(
-        max_features=80,
+        max_features=50,
         ngram_range=(1, 2),
         stop_words="english",
-        min_df=2,
+        min_df=5,
     )
     return ColumnTransformer(
         transformers=[
@@ -119,7 +119,7 @@ def _train_classifiers(
 ) -> tuple[Pipeline, str, list[dict[str, Any]], list[list[int]]]:
     """Train and compare classification candidates, returning the best fitted pipeline."""
     candidates = {
-        "LogisticRegression": LogisticRegression(max_iter=1000, random_state=42),
+        "LogisticRegression": LogisticRegression(C=0.4, max_iter=1000, random_state=42),
         "RandomForestClassifier": RandomForestClassifier(
             n_estimators=160, max_depth=12, min_samples_leaf=2, n_jobs=-1, random_state=42
         ),
@@ -377,7 +377,7 @@ def train_all(data_path: Path = DATA_PATH, artifacts_dir: Path = ARTIFACTS_DIR) 
             "test_rows": int(len(test_idx)),
             "acceptance_rate": round(float(y_accept.mean()), 4),
             "numeric_features": len(NUMERIC_FEATURES),
-            "text_features": "TF-IDF (up to 80 1-2 ngrams)",
+            "text_features": "TF-IDF (up to 50 1-2 ngrams)",
         },
         "classification": {
             "selected_model": best_clf_name,

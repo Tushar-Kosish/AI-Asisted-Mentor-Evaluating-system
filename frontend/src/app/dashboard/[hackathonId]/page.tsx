@@ -12,9 +12,49 @@ interface Submission {
   project_name: string;
   github_link: string;
   status: "AI_ACCEPTED" | "AI_REJECTED" | "NEW" | "AI_ERROR";
+  acceptance_probability?: number | null;
   score_innovation: number | null;
   score_impact: number | null;
+  positive_points?: string[];
+  negative_points?: string[];
+  mentor_questions?: string[];
+  evaluation_mode?: string;
   justification: string | null;
+}
+
+function SubmissionCard({ sub, accepted }: { sub: Submission; accepted: boolean }) {
+  return (
+    <Card className={`bg-neutral-900 ${accepted ? "border-green-500/50" : "border-red-500/50"}`}>
+      <CardHeader>
+        <CardTitle className="flex justify-between items-start text-white">
+          <span>{sub.project_name}</span>
+          {accepted ? (
+            <Badge className="bg-green-200 text-green-900">Accepted</Badge>
+          ) : (
+            <Badge variant="destructive">Rejected</Badge>
+          )}
+        </CardTitle>
+        <CardDescription>
+          <a
+            href={sub.github_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline"
+          >
+            View on GitHub
+          </a>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="text-neutral-300 space-y-2">
+        <div className="flex flex-wrap gap-4 font-semibold">
+          <p>Confidence: <span className="text-emerald-400">{sub.acceptance_probability != null ? `${sub.acceptance_probability.toFixed(1)}%` : "N/A"}</span></p>
+          <p>Innovation: <span className="text-white">{sub.score_innovation?.toFixed(1) ?? "N/A"}</span></p>
+          <p>Impact: <span className="text-white">{sub.score_impact?.toFixed(1) ?? "N/A"}</span></p>
+        </div>
+        <p className="text-sm text-neutral-400">{sub.justification}</p>
+      </CardContent>
+    </Card>
+  );
 }
 
 interface DashboardPageProps {
@@ -96,31 +136,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
           </h2>
           <div className="space-y-4">
             {acceptedProjects.map((sub) => (
-              <Card key={sub.id} className="bg-neutral-900 border-green-500/50">
-                <CardHeader>
-                  <CardTitle className="flex justify-between items-start text-white">
-                    <span>{sub.project_name}</span>
-                    <Badge className="bg-green-200 text-green-900">Accepted</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    <a 
-                      href={sub.github_link} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-blue-400 hover:underline"
-                    >
-                      View on GitHub
-                    </a>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-neutral-300">
-                  <div className="flex gap-4 mb-2 font-semibold">
-                    <p>Innovation: <span className="text-white">{sub.score_innovation?.toFixed(1) || 'N/A'}</span></p>
-                    <p>Impact: <span className="text-white">{sub.score_impact?.toFixed(1) || 'N/A'}</span></p>
-                  </div>
-                  <p className="text-sm text-neutral-400">{sub.justification}</p>
-                </CardContent>
-              </Card>
+              <SubmissionCard key={sub.id} sub={sub} accepted={true} />
             ))}
           </div>
         </div>
@@ -131,31 +147,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
           </h2>
           <div className="space-y-4">
             {rejectedProjects.map((sub) => (
-              <Card key={sub.id} className="bg-neutral-900 border-red-500/50">
-                <CardHeader>
-                  <CardTitle className="flex justify-between items-start text-white">
-                    <span>{sub.project_name}</span>
-                    <Badge variant="destructive">Rejected</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    <a 
-                      href={sub.github_link} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-blue-400 hover:underline"
-                    >
-                      View on GitHub
-                    </a>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-neutral-300">
-                  <div className="flex gap-4 mb-2 font-semibold">
-                    <p>Innovation: <span className="text-white">{sub.score_innovation?.toFixed(1) || 'N/A'}</span></p>
-                    <p>Impact: <span className="text-white">{sub.score_impact?.toFixed(1) || 'N/A'}</span></p>
-                  </div>
-                  <p className="text-sm text-neutral-400">{sub.justification}</p>
-                </CardContent>
-              </Card>
+              <SubmissionCard key={sub.id} sub={sub} accepted={false} />
             ))}
           </div>
         </div>
