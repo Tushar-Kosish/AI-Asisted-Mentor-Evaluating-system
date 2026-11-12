@@ -1,48 +1,37 @@
-# video_parser/app.py (The new, intelligent version)
+"""Video Parser microservice exposing pitch video metadata extraction."""
 
-from flask import Flask, request, jsonify
-import yt_dlp
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+from flask import Flask, jsonify, request
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from video_parser.extractor import extract_video_summary  # noqa: E402
 
 app = Flask(__name__)
 
-@app.route('/parse-video', methods=['POST'])
-def parse_video():
-    data = request.get_json()
-    video_url = data.get('video_link')
 
+@app.route("/parse-video", methods=["POST"])
+def parse_video():
+    data = request.get_json(silent=True) or {}
+    video_url = data.get("video_link")
     if not video_url:
         return jsonify({"error": "video_link is required"}), 400
 
-    # These options tell yt-dlp to NOT download the video,
-    # but to only extract its metadata.
-    ydl_opts = {
-        'quiet': True,
-        'extract_flat': True,
-        'force_generic_extractor': True,
-    }
+    result = extract_video_summary(video_url)
+    status_code = 200 if result.get("success") else 502
+    return jsonify(result), status_code
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            # Extract the info from the YouTube URL
-            info = ydl.extract_info(video_url, download=False)
-            
-            # Create a summary from the real title and description
-            summary = {
-                "title": info.get('title', 'N/A'),
-                "description": info.get('description', 'N/A')
-            }
-            
-            return jsonify({
-                "success": True,
-                "video_summary": summary
-            })
 
-    except Exception as e:
-        # If the link is not a valid video, return a helpful error
-        return jsonify({"success": False, "error": f"Could not process video link: {str(e)}"}), 500
-@app.route('/health')
+@app.route("/health")
 def health():
-    return {'status': 'healthy', 'service': 'video-parser'}, 200
+    return {"status": "healthy", "service": "video-parser"}, 200
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002, debug=True)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5002, debug=False)

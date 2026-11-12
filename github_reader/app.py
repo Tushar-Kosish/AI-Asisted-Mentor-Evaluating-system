@@ -1,46 +1,37 @@
-# github_reader/app.py (Final, more robust version)
+"""GitHub Reader microservice exposing repository README and engineering signal extraction."""
 
-from flask import Flask, request, jsonify
-import requests
-import base64
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+from flask import Flask, jsonify, request
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from github_reader.extractor import extract_github_features  # noqa: E402
 
 app = Flask(__name__)
 
-@app.route('/read-repo', methods=['POST'])
+
+@app.route("/read-repo", methods=["POST"])
 def read_repo():
-    data = request.get_json()
-    if not data or 'github_link' not in data:
+    data = request.get_json(silent=True) or {}
+    github_link = data.get("github_link")
+    if not github_link:
         return jsonify({"error": "github_link is required"}), 400
 
-    github_link = data['github_link']
+    result = extract_github_features(github_link)
+    status_code = 200 if result.get("success") else 502
+    return jsonify(result), status_code
 
-    try:
-        # Example: "https://github.com/google/gemini-api-docs" -> "google/gemini-api-docs"
-        parts = github_link.strip('/').split('/')
-        repo_path = f"{parts[-2]}/{parts[-1]}"
 
-        # --- THIS IS THE CHANGED LINE ---
-        # Instead of the generic '/readme', we ask for the specific file. This is more reliable.
-        api_url = f"https://api.github.com/repos/{repo_path}/contents/README.md"
-        
-        headers = {"Accept": "application/vnd.github.v3+json"}
-        response = requests.get(api_url, headers=headers)
-        response.raise_for_status() 
-
-        repo_data = response.json()
-        
-        content_encoded = repo_data['content']
-        content_decoded = base64.b64decode(content_encoded).decode('utf-8')
-
-        return jsonify({
-            "success": True,
-            "readme_content": content_decoded
-        })
-
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-@app.route('/health')
+@app.route("/health")
 def health():
-    return {'status': 'healthy', 'service': 'github-reader'}, 200
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    return {"status": "healthy", "service": "github-reader"}, 200
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=False)
