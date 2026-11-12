@@ -1,0 +1,202 @@
+{
+  "trained_at_utc": "2026-11-12T06:24:38.580316+00:00",
+  "dataset": {
+    "path": "data/project_submissions.csv",
+    "total_rows": 650,
+    "train_rows": 520,
+    "test_rows": 130,
+    "acceptance_rate": 0.6631,
+    "numeric_features": 11,
+    "text_features": "TF-IDF (up to 80 1-2 ngrams)"
+  },
+  "classification": {
+    "selected_model": "LogisticRegression",
+    "candidates": [
+      {
+        "model": "LogisticRegression",
+        "cv_accuracy": 0.8923,
+        "cv_f1": 0.9183,
+        "cv_roc_auc": 0.962,
+        "test_accuracy": 0.8385,
+        "test_precision": 0.8916,
+        "test_recall": 0.8605,
+        "test_f1": 0.8757,
+        "test_roc_auc": 0.9376
+      },
+      {
+        "model": "RandomForestClassifier",
+        "cv_accuracy": 0.8846,
+        "cv_f1": 0.913,
+        "cv_roc_auc": 0.9548,
+        "test_accuracy": 0.8231,
+        "test_precision": 0.8621,
+        "test_recall": 0.8721,
+        "test_f1": 0.8671,
+        "test_roc_auc": 0.9202
+      },
+      {
+        "model": "GradientBoostingClassifier",
+        "cv_accuracy": 0.8788,
+        "cv_f1": 0.909,
+        "cv_roc_auc": 0.9545,
+        "test_accuracy": 0.8538,
+        "test_precision": 0.8851,
+        "test_recall": 0.8953,
+        "test_f1": 0.8902,
+        "test_roc_auc": 0.9234
+      }
+    ],
+    "confusion_matrix": [
+      [
+        35,
+        9
+      ],
+      [
+        12,
+        74
+      ]
+    ],
+    "labels": [
+      "REJECTED",
+      "ACCEPTED"
+    ]
+  },
+  "regression_innovation": {
+    "selected_model": "GradientBoostingRegressor",
+    "candidates": [
+      {
+        "model": "Ridge",
+        "cv_mae": 0.6601,
+        "cv_r2": 0.9108,
+        "test_mae": 0.6604,
+        "test_rmse": 0.8343,
+        "test_r2": 0.9069
+      },
+      {
+        "model": "RandomForestRegressor",
+        "cv_mae": 0.5363,
+        "cv_r2": 0.9359,
+        "test_mae": 0.5962,
+        "test_rmse": 0.7622,
+        "test_r2": 0.9223
+      },
+      {
+        "model": "GradientBoostingRegressor",
+        "cv_mae": 0.5284,
+        "cv_r2": 0.9384,
+        "test_mae": 0.5687,
+        "test_rmse": 0.7464,
+        "test_r2": 0.9255
+      }
+    ]
+  },
+  "regression_impact": {
+    "selected_model": "GradientBoostingRegressor",
+    "candidates": [
+      {
+        "model": "Ridge",
+        "cv_mae": 0.6399,
+        "cv_r2": 0.9185,
+        "test_mae": 0.6166,
+        "test_rmse": 0.768,
+        "test_r2": 0.9237
+      },
+      {
+        "model": "RandomForestRegressor",
+        "cv_mae": 0.5715,
+        "cv_r2": 0.9285,
+        "test_mae": 0.554,
+        "test_rmse": 0.7057,
+        "test_r2": 0.9356
+      },
+      {
+        "model": "GradientBoostingRegressor",
+        "cv_mae": 0.5362,
+        "cv_r2": 0.9393,
+        "test_mae": 0.5289,
+        "test_rmse": 0.6695,
+        "test_r2": 0.942
+      }
+    ]
+  },
+  "top_features": [
+    {
+      "feature": "Repository File Count",
+      "raw_name": "num__file_count",
+      "kind": "repository",
+      "importance": 0.0817
+    },
+    {
+      "feature": "Commit Count",
+      "raw_name": "num__commit_count",
+      "kind": "repository",
+      "importance": 0.0571
+    },
+    {
+      "feature": "Active Development Days",
+      "raw_name": "num__days_active",
+      "kind": "repository",
+      "importance": 0.0422
+    },
+    {
+      "feature": "Text: \"fintech\"",
+      "raw_name": "txt__fintech",
+      "kind": "text",
+      "importance": 0.0395
+    },
+    {
+      "feature": "Text: \"climatetech\"",
+      "raw_name": "txt__climatetech",
+      "kind": "text",
+      "importance": 0.0393
+    },
+    {
+      "feature": "Text: \"api\"",
+      "raw_name": "txt__api",
+      "kind": "text",
+      "importance": 0.0321
+    },
+    {
+      "feature": "Text: \"files\"",
+      "raw_name": "txt__files",
+      "kind": "text",
+      "importance": 0.0317
+    },
+    {
+      "feature": "Text: \"evaluation metrics\"",
+      "raw_name": "txt__evaluation metrics",
+      "kind": "text",
+      "importance": 0.0312
+    },
+    {
+      "feature": "Text: \"metrics\"",
+      "raw_name": "txt__metrics",
+      "kind": "text",
+      "importance": 0.0312
+    },
+    {
+      "feature": "Pitch Video Provided",
+      "raw_name": "num__has_demo_video",
+      "kind": "repository",
+      "importance": 0.0303
+    },
+    {
+      "feature": "Architecture / Setup Docs",
+      "raw_name": "num__has_architecture_docs",
+      "kind": "repository",
+      "importance": 0.03
+    },
+    {
+      "feature": "Text: \"evaluation\"",
+      "raw_name": "txt__evaluation",
+      "kind": "text",
+      "importance": 0.0286
+    }
+  ],
+  "charts": [
+    "model_comparison.png",
+    "confusion_matrix.png",
+    "feature_importance.png",
+    "score_predictions.png"
+  ]
+}
